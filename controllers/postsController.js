@@ -107,31 +107,43 @@ function update(req, res) {
 
 // DELETE → DELETE /posts/:id
 function destroy(req, res) {
-    // Prendo l'id dai parametri della richiesta e lo converto in numero
-    const id = parseInt(req.params.id);
+    // // Prendo l'id dai parametri della richiesta e lo converto in numero
+    // const id = parseInt(req.params.id);
 
-    // Trovo l'indice del post con quell'id
-    const index = posts.findIndex(post => post.id === id);
+    // // Trovo l'indice del post con quell'id
+    // const index = posts.findIndex(post => post.id === id);
 
-    // Se il post non esiste, rispondo con 404
-    if (index === -1) {
-        res.status(404);
+    // // Se il post non esiste, rispondo con 404
+    // if (index === -1) {
+    //     res.status(404);
 
-        return res.json({
-            status: 404,
-            error: "Not Found",
-            message: "Post non trovato"
-        });
-    }
+    //     return res.json({
+    //         status: 404,
+    //         error: "Not Found",
+    //         message: "Post non trovato"
+    //     });
+    // }
 
-    // Rimuovo il post dall'array
-    posts.splice(index, 1);
+    // // Rimuovo il post dall'array
+    // posts.splice(index, 1);
 
-    // Stampo la lista aggiornata nel terminale
-    console.log("Lista post aggiornata:", posts);
+    // // Stampo la lista aggiornata nel terminale
+    // console.log("Lista post aggiornata:", posts);
 
-    // forziamo status secondo convenzioni REST che chiude anche function
-    res.sendStatus(204)
+    // // forziamo status secondo convenzioni REST che chiude anche function
+    // res.sendStatus(204)
+    
+
+    // recuperiamo l'id dall' URL e trasformiamolo in numero
+    const id = parseInt(req.params.id)
+
+    const sql = 'DELETE FROM posts WHERE id = ?';
+
+    //Eliminiamo la pizza dal menu                       
+    connection.query(sql, [id], (err) => {
+        if (err) return res.status(500).json({ error: 'Failed to delete post' });
+        res.sendStatus(204)
+    });
 }
 
 
