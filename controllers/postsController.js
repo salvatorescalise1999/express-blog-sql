@@ -1,19 +1,19 @@
-const posts = require("../data/posts");
+// Importiamo il file di connessione al database
+const connection = require('../data/db');
+
+
+// const posts = require("../data/posts");
 
 // INDEX → GET /posts
 function index(req, res) {
-    // Inizialmente, tutti i post vengono considerati
-    let filteredPosts = posts;
+      // prepariamo la query
+    const sql = 'SELECT * FROM posts';
 
-    // Se arriva un query param 'tag', filtriamo solo i post che contengono quel tag
-    if (req.query.tag) {
-        filteredPosts = posts.filter(
-            post => post.tags.includes(req.query.tag)
-        );
-    }
-
-    // Rispondo con l'array filtrato in formato JSON
-    res.json(filteredPosts);
+    // eseguiamo la query!
+    connection.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database query failed' });
+        res.json(results);
+    });
 }
 
 
