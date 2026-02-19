@@ -6,7 +6,8 @@ const connection = require('../data/db');
 
 // INDEX → GET /posts
 function index(req, res) {
-      // prepariamo la query
+
+    // prepariamo la query
     const sql = 'SELECT * FROM posts';
 
     // eseguiamo la query!
@@ -22,27 +23,34 @@ function show(req, res) {
     // Prendo l'id dai parametri della richiesta e lo converto in numero
     const id = parseInt(req.params.id);
 
-    // introduciamo un errore a caso per test middelware err 500
-    // throw new Error("Errore di test middleware");
+    const sql = 'SELECT * FROM posts WHERE id = ?';
 
-    // Cerco il post con l'id corrispondente nell'array posts
-    const post = posts.find(p => p.id === id);
+    // Prepariamo la query per i tags aiutandoci con una join e Where
+    const tagsSql = `
+    SELECT T.*
+    FROM tags T
+    JOIN post_tag PT ON T.id = PT.tag_id
+    WHERE PT.post_id = ?
+    `;
 
-    // Se il post non esiste, rispondo con status 404 e un messaggio JSON
-    if (!post) {
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database query failed' });
+        if (results.length === 0) return res.status(404).json({ error: 'Post not found' });
 
-        // forziamo lo stato di risposta a 404
-        res.status(404);
+        // Recuperiamo il post
+        const post = results[0];
 
-        // rispondiamo con oggetto di errore
-        return res.json({
-            error: "Not Found",
-            message: "Post non trovato"
-        })
-    }
+        // Facciamo partire la seconda query (join) per recuperare i tag
+        connection.query(tagsSql, [id], (err, tagsResults) => {
+            if (err) return res.status(500).json({ error: 'Database query failed' });
 
-    // Se il post esiste, restituisco il post in formato JSON
-    res.json(post);
+            // Aggiungiamo i tag al post
+            post.tags = tagsResults;
+
+            res.json(post);
+        });
+    });
+
 }
 
 
@@ -107,32 +115,6 @@ function update(req, res) {
 
 // DELETE → DELETE /posts/:id
 function destroy(req, res) {
-    // // Prendo l'id dai parametri della richiesta e lo converto in numero
-    // const id = parseInt(req.params.id);
-
-    // // Trovo l'indice del post con quell'id
-    // const index = posts.findIndex(post => post.id === id);
-
-    // // Se il post non esiste, rispondo con 404
-    // if (index === -1) {
-    //     res.status(404);
-
-    //     return res.json({
-    //         status: 404,
-    //         error: "Not Found",
-    //         message: "Post non trovato"
-    //     });
-    // }
-
-    // // Rimuovo il post dall'array
-    // posts.splice(index, 1);
-
-    // // Stampo la lista aggiornata nel terminale
-    // console.log("Lista post aggiornata:", posts);
-
-    // // forziamo status secondo convenzioni REST che chiude anche function
-    // res.sendStatus(204)
-    
 
     // recuperiamo l'id dall' URL e trasformiamolo in numero
     const id = parseInt(req.params.id)
