@@ -39,7 +39,7 @@ Prendiamo le API precedentemente create per il vostro blog ed aggiungiamo la per
 
 ---
 
-<iframe src="./data/blog_db.sql" width="100%" height="600px"></iframe>
+
 
 
 
